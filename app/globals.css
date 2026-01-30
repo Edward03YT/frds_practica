@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  font-display: swap; /* fallback swap pentru orice alt font */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Typography */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  color: #444;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* React Calendar overrides */
+.react-calendar__tile {
+  color: black !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: black !important;
+}
+
+.react-calendar__navigation__label,
+.react-calendar__navigation__arrow,
+.react-calendar__month-view__weekdays__weekday {
+  color: black !important;
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background: transparent !important;
+  border: 2px solid black !important;
+  color: black !important;
+}
+
+/* Zilele de weekend */
+.weekend-day {
+  color: red !important;
+  font-weight: bold !important;
+}
+
+.table-fixed-cols th,
+.table-fixed-cols td {
+  min-width: 120px;
+  width: 120px;
+  max-width: 120px;
+  height: 40px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
