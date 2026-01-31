@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run db:init && next build",
     "start": "next start",
     "lint": "eslint .",
     "db:init": "node app/scripts/init-db.js",
