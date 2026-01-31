@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
         const ID_RAP = 1;
         const nrCrtList: any[] = [];
         for (let rowIndex = 2; rowIndex < lastRowToValidate; rowIndex++) {
-            let row = detaliatRows[rowIndex];
+            const row = detaliatRows[rowIndex];
             if (!row) continue;
             nrCrtList.push(row[0]);
         }
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
 
         let rowsInserted = 0;
         for (let rowIndex = 2; rowIndex < lastRowToValidate; rowIndex++) {
-            let row = detaliatRows[rowIndex];
+            const row = detaliatRows[rowIndex];
             if (!row) continue;
 
             while (row.length < 20) row.push(0);
@@ -196,10 +196,10 @@ export async function POST(req: NextRequest) {
                 raportata = 0;
             }
 
-            let valoareCheltuieli = parseExcelNumber(row[16]);
-            let sumaEligibila = parseExcelNumber(row[17]);
-            let grantExtern = parseExcelNumber(row[18]);
-            let grantPublica = parseExcelNumber(row[19]);
+            const valoareCheltuieli = parseExcelNumber(row[16]);
+            const sumaEligibila = parseExcelNumber(row[17]);
+            const grantExtern = parseExcelNumber(row[18]);
+            const grantPublica = parseExcelNumber(row[19]);
 
             const values = [
                 ID_RAP,

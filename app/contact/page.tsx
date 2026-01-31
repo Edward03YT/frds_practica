@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Facebook, Twitter, Notebook, Linkedin, Youtube, Info, MapPin, Phone, Mail, Map, Menu, X, Home, User, Clipboard, LogOut, Shield, Contact, ScrollText } from "lucide-react";
-
 
 const menuItems = [
   { icon: Home, label: "ACASA", href: "/home" },
@@ -17,7 +16,6 @@ const menuItems = [
   { icon: Shield, label: "GDPR", href: "/politica-gdpr" },
   { icon: Phone, label: "CONTACT", href: "/contact" },
   { icon: LogOut, label: "DECONECTARE", href: "/login" },
-
 ];
 
 const problemTypes = [
@@ -56,31 +54,32 @@ const ContactPage = () => {
   const [menuState, setMenuState] = useState<"closed" | "open">("closed");
   const [problemType, setProblemType] = useState("");
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", subject: "", message: "" });
-  const [showPage, setShowPage] = useState(true);
+  
+  // FIX: Inițializăm cu false ca să evităm update-ul sincron din useEffect
+  const [showPage, setShowPage] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     const verifyAuth = async () => {
       try {
-        // evită cache-ul și asigură trimiterea cookie-urilor
         const res = await fetch("/api/me", { credentials: "include", cache: "no-store" });
         if (!active) return;
 
         if (res.ok) {
-          setShowPage(true); // ești autenticat
+          setShowPage(true); // ești autenticat, afișăm pagina
         } else {
-          setShowPage(false);
+          // Nu mai setăm false aici, pentru că e deja false din start
           router.replace(`/login?next=${encodeURIComponent("/contact")}`);
         }
       } catch {
-        setShowPage(false);
-        router.replace(`/login?next=${encodeURIComponent("/contact")}`);
+        if (active) {
+            router.replace(`/login?next=${encodeURIComponent("/contact")}`);
+        }
       }
     };
 
-    // Poți porni cu showPage = false ca să nu „clipească” conținutul
-    setShowPage(false);
+    // FIX: Am șters setShowPage(false) de aici care cauza eroarea
     verifyAuth();
 
     return () => {

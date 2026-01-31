@@ -240,7 +240,7 @@ export default function DocAchizitiiManager() {
     }
 
     setIsUploading(true)
-    let errors: string[] = []
+    const errors: string[] = []
     try {
       for (const file of files) {
         const signed = await detectDigitalSignature(file)

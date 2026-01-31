@@ -47,7 +47,6 @@ function Button({
 
 type MenuState = "closed" | "open";
 
-
 const menuItems = [
   { icon: Home, label: "ACASA", href: "/home" },
   { icon: User, label: "PROFIL", href: "/profil" },
@@ -58,8 +57,6 @@ const menuItems = [
   { icon: Shield, label: "GDPR", href: "/politica-gdpr" },
   { icon: Phone, label: "CONTACT", href: "/contact" },
   { icon: LogOut, label: "DECONECTARE", href: "/login" },
-
-
 ];
 
 const MenuItem = memo(
@@ -84,8 +81,9 @@ const MenuItem = memo(
     >
       <a
         href={href}
-        className={`flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors ${menuState === "open" ? "justify-start" : "justify-center"
-          }`}
+        className={`flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+          menuState === "open" ? "justify-start" : "justify-center"
+        }`}
         aria-label={label}
       >
         <Icon className="h-5 w-5 flex-shrink-0" />
@@ -109,6 +107,9 @@ const MenuItem = memo(
   )
 );
 
+// FIX: Adăugat displayName pentru componenta memoizată (fixează eroarea de linting)
+MenuItem.displayName = "MenuItem";
+
 const pageVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.7 } },
@@ -123,10 +124,11 @@ const cardVariants = {
 
 const GDPRPage = () => {
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  // FIX: Am șters username și isAdmin care nu erau folosite și dădeau warning
   const [menuState, setMenuState] = useState<MenuState>("closed");
-  const [showPage, setShowPage] = useState(true);
+  
+  // FIX: Inițializăm cu false ca să nu clipească și să evităm update-ul din useEffect
+  const [showPage, setShowPage] = useState(false);
 
   const toggleMenu = useCallback(() => {
     setMenuState((prev) => (prev === "closed" ? "open" : "closed"));
@@ -142,26 +144,25 @@ const GDPRPage = () => {
         if (!active) return;
 
         if (res.ok) {
-          setShowPage(true); // ești autenticat
+          setShowPage(true); // ești autenticat, arată pagina
         } else {
-          setShowPage(false);
+          // Nu setăm false aici, pentru că e deja false
           router.replace(`/login?next=${encodeURIComponent("/politica-gdpr")}`);
         }
       } catch {
-        setShowPage(false);
-        router.replace(`/login?next=${encodeURIComponent("/politica-gdpr")}`);
+        if (active) {
+            router.replace(`/login?next=${encodeURIComponent("/politica-gdpr")}`);
+        }
       }
     };
 
-    // Poți porni cu showPage = false ca să nu „clipească” conținutul
-    setShowPage(false);
+    // FIX: Am scos setShowPage(false) care cauza bucla infinită
     verifyAuth();
 
     return () => {
       active = false;
     };
   }, [router]);
-
 
   const sidebarVariants = {
     closed: {

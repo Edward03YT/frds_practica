@@ -46,9 +46,8 @@ const menuItems = [
   { icon: Shield, label: "GDPR", href: "/politica-gdpr" },
   { icon: Phone, label: "CONTACT", href: "/contact" },
   { icon: LogOut, label: "DECONECTARE", href: "/login" },
-
-
 ];
+
 const sidebarVariants = {
   closed: {
     x: -280,
@@ -82,7 +81,10 @@ const cardVariants = {
 const GuidePage = () => {
   const [menuState, setMenuState] = useState<"closed" | "open">("closed");
   const [showPDF, setShowPDF] = useState(false);
-  const [showPage, setShowPage] = useState(true);
+  
+  // FIX: Inițializăm cu false (ascuns)
+  const [showPage, setShowPage] = useState(false);
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -95,19 +97,19 @@ const GuidePage = () => {
         if (!active) return;
 
         if (res.ok) {
-          setShowPage(true); // ești autenticat
+          setShowPage(true); // ești autenticat, afișăm pagina
         } else {
-          setShowPage(false);
+          // Nu e nevoie să setăm false, e deja false
           router.replace(`/login?next=${encodeURIComponent("/ghid")}`);
         }
       } catch {
-        setShowPage(false);
-        router.replace(`/login?next=${encodeURIComponent("/ghid")}`);
+        if (active) {
+            router.replace(`/login?next=${encodeURIComponent("/ghid")}`);
+        }
       }
     };
 
-    // Poți porni cu showPage = false ca să nu „clipească” conținutul
-    setShowPage(false);
+    // FIX: Am eliminat setShowPage(false) de aici
     verifyAuth();
 
     return () => {

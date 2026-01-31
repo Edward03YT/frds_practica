@@ -27,7 +27,7 @@ const db = new Database("database.sqlite");
 
 async function getUserFromRequest(req: NextRequest): Promise<any> {
   const cookieStore = await cookies();
-  let token = cookieStore.get('authToken')?.value;
+  const token = cookieStore.get('authToken')?.value;
   if (!token) return null;
   const user = verifyToken(token);
   return user;

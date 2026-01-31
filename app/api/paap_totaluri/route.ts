@@ -9,7 +9,7 @@ async function getUserFromRequest(req: NextRequest) {
   console.log('🔐 [AUTH] Getting user from request...');
   try {
     const cookieStore = await cookies();
-    let token = cookieStore.get('authToken')?.value;
+    const token = cookieStore.get('authToken')?.value;
     console.log('🔐 [AUTH] Token found:', !!token);
 
     if (!token) {

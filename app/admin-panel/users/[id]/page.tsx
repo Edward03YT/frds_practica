@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -11,7 +11,6 @@ import {
   Globe,
   Trash2,
   Download,
-  FolderOpen,
   AlertCircle,
   Phone,
   MapPin,
@@ -29,7 +28,7 @@ interface Upload {
   uploaded_at: string;
 }
 
-interface User {
+interface UserData {
   id: number;
   username: string;
   name: string;
@@ -54,10 +53,17 @@ interface UploadStats {
 }
 
 interface UserDetailData {
-  user: User;
+  user: UserData;
   uploads: Upload[];
   uploadStats: UploadStats;
   filesByPage: { [key: string]: Upload[] };
+}
+
+interface Announcement {
+  id: number;
+  subject: string;
+  message: string;
+  created_at: string;
 }
 
 const pageVariants = {
@@ -153,19 +159,23 @@ function formatDateUTC(dateString: string): string {
 function AnnouncementSection({ userId }: { userId: number }) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/user-announcements?userId=${userId}`);
-    const data = await res.json();
-    if (data.success) setAnnouncements(data.announcements);
-    setLoading(false);
-  };
+    try {
+      const res = await fetch(`/api/user-announcements?userId=${userId}`);
+      const data = await res.json();
+      if (data.success) setAnnouncements(data.announcements);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
-  useEffect(() => { fetchAnnouncements(); }, [userId]);
+  useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
 
   const handleSend = async () => {
     if (!subject.trim() || !message.trim()) return;
@@ -248,7 +258,10 @@ export default function UserDetailPage() {
   const [data, setData] = useState<UserDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showPage, setShowPage] = useState(true);
+  
+  // FIX: Inițializăm cu false
+  const [showPage, setShowPage] = useState(false);
+  
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
@@ -257,7 +270,7 @@ export default function UserDetailPage() {
   const [showPassword, setShowPassword] = useState(false);
   
   // Adaugă state pentru utilizatorul curent (cel logat)
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
 
   async function handleDownload(fileId: number, fileName: string) {
     try {
@@ -283,39 +296,7 @@ export default function UserDetailPage() {
     }
   }
 
-  useEffect(() => {
-    const handler = () => {
-      fetchUserDetails();
-    };
-    window.addEventListener("user-files-changed", handler);
-    return () => window.removeEventListener("user-files-changed", handler);
-  }, [userId]);
-
-  useEffect(() => {
-    async function checkAdmin() {
-      const res = await fetch('/api/me');
-      if (!res.ok) {
-        setShowPage(false);
-        setTimeout(() => router.replace("/home"), 500);
-        return;
-      }
-      const data = await res.json();
-      if (!data.user || (!data.user.is_admin && !data.user.is_moderator)) {
-        setShowPage(false);
-        setTimeout(() => router.replace("/home"), 500);
-        return;
-      }
-      
-      // Salvează informațiile utilizatorului curent
-      setCurrentUser(data.user);
-      
-      fetchUserDetails();
-    }
-    checkAdmin();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
-
-  async function fetchUserDetails() {
+  const fetchUserDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -333,7 +314,42 @@ export default function UserDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [userId]);
+
+  useEffect(() => {
+    const handler = () => {
+      fetchUserDetails();
+    };
+    window.addEventListener("user-files-changed", handler);
+    return () => window.removeEventListener("user-files-changed", handler);
+  }, [fetchUserDetails]);
+
+  useEffect(() => {
+    async function checkAdmin() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+            router.replace("/home");
+            return;
+        }
+        const data = await res.json();
+        if (!data.user || (!data.user.is_admin && !data.user.is_moderator)) {
+            router.replace("/home");
+            return;
+        }
+        
+        // Salvează informațiile utilizatorului curent
+        setCurrentUser(data.user);
+        
+        // Acum putem afișa pagina și încărca datele
+        setShowPage(true);
+        fetchUserDetails();
+      } catch (e) {
+         router.replace("/home");
+      }
+    }
+    checkAdmin();
+  }, [userId, router, fetchUserDetails]);
 
   async function deleteFile(uploadId: number) {
     if (!confirm("Sigur vrei să ștergi acest fișier?")) return;
@@ -376,15 +392,16 @@ export default function UserDetailPage() {
     }
   }
 
-  function formatFileSize(bytes: number) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
+  // Not used in UI but useful helper if needed later
+  // function formatFileSize(bytes: number) {
+  //   if (bytes === 0) return '0 Bytes';
+  //   const k = 1024;
+  //   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  //   const i = Math.floor(Math.log(bytes) / Math.log(k));
+  //   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  // }
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2">

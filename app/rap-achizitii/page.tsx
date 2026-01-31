@@ -928,7 +928,7 @@ const AchizitiiDocumentsPage = () => {
 
           // 1. Ia id-ul nou din răspuns (dacă backendul îl returnează)
           const result = await res.json();
-          let newFileId = result.id;
+          const newFileId = result.id;
 
           // 2. Refă lista de fișiere
           await fetchDbFiles();

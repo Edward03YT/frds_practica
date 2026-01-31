@@ -497,7 +497,7 @@ const PaapPage = () => {
 
         for (let r = 2; r < ws1.length; r++) {
             const tip = (ws1[r][1] ?? '').toString().trim().toUpperCase();
-            let val = (ws1[r][5] ?? '').toString().replace(/\./g, '').replace(',', '.');
+            const val = (ws1[r][5] ?? '').toString().replace(/\./g, '').replace(',', '.');
             const num = parseFloat(val);
             if (!isNaN(num)) {
                 if (tip === 'P') sumaProduse += num;
@@ -506,7 +506,7 @@ const PaapPage = () => {
             }
         }
 
-        let ws2 = sheets[sheetNames[1]] ? sheets[sheetNames[1]].map((row: any[]) => [...row]) : [];
+        const ws2 = sheets[sheetNames[1]] ? sheets[sheetNames[1]].map((row: any[]) => [...row]) : [];
         while (ws2.length < 6) ws2.push([]);
 
         // Nu modificăm header/subheader
@@ -707,7 +707,7 @@ const PaapPage = () => {
         let produse = 0, servicii = 0, lucrari = 0;
         for (let r = 2; r < data.length; r++) {
             const tip = (data[r][1] ?? '').toString().trim().toUpperCase();
-            let val = (data[r][5] ?? '').toString().replace(/\./g, '').replace(',', '.');
+            const val = (data[r][5] ?? '').toString().replace(/\./g, '').replace(',', '.');
             const num = parseFloat(val);
             if (!isNaN(num)) {
                 if (tip === 'P') produse += num;
@@ -765,7 +765,7 @@ const PaapPage = () => {
                 } catch { }
             }
         }
-        // eslint-disable-next-line
+         
     }, [fileName, selectedSheet]);
 
     const handleDownload = () => {
